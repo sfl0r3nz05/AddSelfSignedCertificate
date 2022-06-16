@@ -50,7 +50,7 @@ to sign your own certificates you need to become a certification authority, for 
   keyUsage               = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
   subjectAltName         = @alt_names
   [ alt_names ]
-  DNS.1 = *.kyma.local
+  DNS.1 = daim.ceit.com
     ```
 
 ### Sign the certificate request using CA
