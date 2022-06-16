@@ -1,8 +1,8 @@
 # Add tls encryption to js frontend/backend
 
-## Enviroment
+## Environment
 
-In this particular case the frontend is using react js with babel, and the backend is using expres js.
+In this particular case the frontend is using react js with babel, and the backend is using express js.
 
 ## Generate certificates
 
@@ -42,14 +42,16 @@ to sign your own certificates you need to become a certification authority, for 
    openssl req -new -key tls.key -out tls.csr
     ```
 
-- Create a config file openssl.cnf with a list of domain names associated with the certificate (replace daim.ceit.com with your hown domain)
-
-> basicConstraints       = CA:FALSE
-> authorityKeyIdentifier = keyid:always, issuer:always
-> keyUsage               = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
-> subjectAltName         = @alt_names
-> [ alt_names ]
-> DNS.1 = daim.ceit.com
+- Create a config file openssl.cnf with a list of domain names associated with the certificate (replace daim.ceit.com with your own domain)
+  ``` sh
+  # Extensions to add to a certificate request
+  basicConstraints       = CA:FALSE
+  authorityKeyIdentifier = keyid:always, issuer:always
+  keyUsage               = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
+  subjectAltName         = @alt_names
+  [ alt_names ]
+  DNS.1 = *.kyma.local
+    ```
 
 ### Sign the certificate request using CA
 
@@ -81,16 +83,39 @@ to sign your own certificates you need to become a certification authority, for 
 
 ## Implementation
 
-### React + babel
+### React + babel (Frontend)
 
-in the launch command we will need to add the --https parameter at the launch command in the packaje.json file
+ we will need to add the --https --key and --cert parameters at the launch command in the package.json file
 
 ``` sh
-    "start": "babel-node ./node_modules/webpack-dev-server/bin/webpack-dev-server --https --key  -- --host 0.0.0.0 --open",
+    "start": "babel-node ./node_modules/webpack-dev-server/bin/webpack-dev-server --https --key "route to your key" --cert "route to your cert" --host 0.0.0.0 --open",
   ```
+### Express js (Backend)
+
+  The file to change is the one that contains the server startup, In this particular project the file that contains the configuration is backend/bin/www, but it can be other
+
+``` js  
+    const http = require('http');
+    const app = require('../app'); 
+    const port = parseInt(process.env.PORT, 10) || 8001; 
+    app.set('port', port);
+
+    const server = http.createServer(app);
+    server.listen(port, () => {
+      console.log(`Server is running on port ${port}.`);
+    });
+
+  ```
+### Install certificate
 
 To use the self signed certificates we will need to tell our computer to trust our ca following this steps:
 
 - windows
-
-- Linux
+    - Go to the windows device certificate manager.
+    - Select “Trusted Root Certification Authorities”, right-click “Certificates” and select “All Tasks” then “Import”
+    - In the new window select the default options and the rootCA.pem file and save the changes
+- Linux (Docker included)
+    - Copy the certificate to the /usr/local/share/ca-certificates/ route whit the following command:
+    ``` sh
+    cp rootCA.pem /usr/local/share/ca-certificates/
+  ```
