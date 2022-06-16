@@ -95,12 +95,18 @@ to sign your own certificates you need to become a certification authority, for 
   The file to change is the one that contains the server startup, In this particular project the file that contains the configuration is backend/bin/www, but it can be other
 
 ``` js  
-    const http = require('http');
-    const app = require('../app'); 
+    const https = require('https');
+    const app = require('../app');
+    const fs = require('fs');
     const port = parseInt(process.env.PORT, 10) || 8001; 
+
+    const privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
+    const certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+    const credentials = {key: privateKey, cert: certificate};
+
     app.set('port', port);
 
-    const server = http.createServer(app);
+    const server = https.createServer(credentials, app);
     server.listen(port, () => {
       console.log(`Server is running on port ${port}.`);
     });
