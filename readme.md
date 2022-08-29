@@ -96,20 +96,16 @@ to sign your own certificates you need to become a certification authority, for 
 
 ``` js  
     const https = require('https');
-    const app = require('../app');
-    const fs = require('fs');
-    const port = parseInt(process.env.PORT, 10) || 8001; 
-
-    const privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
-    const certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
-    const credentials = {key: privateKey, cert: certificate};
-
-    app.set('port', port);
-
-    const server = https.createServer(credentials, app);
-    server.listen(port, () => {
-      console.log(`Server is running on port ${port}.`);
-    });
+const fs = require('fs');
+const app = require('../app'); // Recogemos el modulo de app con express
+const port = parseInt(process.env.PORT, 10) || 8001; // Creamos un puerto
+app.set('port', port); // Lo aplicamos
+let options = {
+  key: fs.readFileSync('./certs2/tls.key'),
+  cert: fs.readFileSync('./certs2/tls.crt')
+};
+//const server = https.createServer(app); // Creamos el servidor
+const server = https.createServer(options, app).listen(port);
 
   ```
 ### Install certificate
