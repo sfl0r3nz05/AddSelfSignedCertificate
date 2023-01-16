@@ -122,7 +122,7 @@ To use the self signed certificates we will need to tell our computer to trust o
     cp rootCA.pem /usr/local/share/ca-certificates/
     ```
 
-## MQTT
+## MQTT Environment
 
 ### Basic Broker Configuration
 
