@@ -55,13 +55,7 @@ to sign your own certificates you need to become a certification authority, for 
 
 ### Sign the certificate request using CA
 
-- To sign the CSR using openssl.cnf:
-
-  ``` sh
-    openssl genrsa -des3 -out rootCA.key 2048
-    ```
-
-- Generate a root certificate
+- To sign the CSR using openssl.cnf and the rootCA created:
 
   ``` sh
     openssl x509 -req \
