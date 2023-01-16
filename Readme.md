@@ -81,27 +81,27 @@ to sign your own certificates you need to become a certification authority, for 
 
  we will need to add the --https --key and --cert parameters at the launch command in the package.json file
 
-``` sh
+  ```console
     "start": "babel-node ./node_modules/webpack-dev-server/bin/webpack-dev-server --https --key "route to your key" --cert "route to your cert" --host 0.0.0.0 --open",
   ```
 ### Express js (Backend)
 
   The file to change is the one that contains the server startup, In this particular project the file that contains the configuration is backend/bin/www, but it can be other
 
-``` js  
-    const https = require('https');
-const fs = require('fs');
-const app = require('../app'); // Recogemos el modulo de app con express
-const port = parseInt(process.env.PORT, 10) || 8001; // Creamos un puerto
-app.set('port', port); // Lo aplicamos
-let options = {
-  key: fs.readFileSync('./certs2/tls.key'),
-  cert: fs.readFileSync('./certs2/tls.crt')
-};
-//const server = https.createServer(app); // Creamos el servidor
-const server = https.createServer(options, app).listen(port);
-
+  ``` console
+  const https = require('https');
+  const fs = require('fs');
+  const app = require('../app'); // Recogemos el modulo de app con express
+  const port = parseInt(process.env.PORT, 10) || 8001; // Creamos un puerto
+  app.set('port', port); // Lo aplicamos
+  let options = {
+    key: fs.readFileSync('./certs2/tls.key'),
+    cert: fs.readFileSync('./certs2/tls.crt')
+  };
+  //const server = https.createServer(app); // Creamos el servidor
+  const server = https.createServer(options, app).listen(port);
   ```
+
 ### Install certificate
 
 To use the self signed certificates we will need to tell our computer to trust our ca following this steps:
@@ -112,6 +112,7 @@ To use the self signed certificates we will need to tell our computer to trust o
     - In the new window select the default options and the rootCA.pem file and save the changes
 - Linux (Docker included)
     - Copy the certificate to the /usr/local/share/ca-certificates/ route whit the following command:
-    ``` sh
+
+    ```console
     cp rootCA.pem /usr/local/share/ca-certificates/
-  ```
+    ```
