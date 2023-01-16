@@ -88,7 +88,7 @@ to sign your own certificates you need to become a certification authority, for 
 
   The file to change is the one that contains the server startup, In this particular project the file that contains the configuration is backend/bin/www, but it can be other
 
-  ``` console
+  ```js
   const https = require('https');
   const fs = require('fs');
   const app = require('../app'); // Recogemos el modulo de app con express
@@ -113,6 +113,6 @@ To use the self signed certificates we will need to tell our computer to trust o
 - Linux (Docker included)
     - Copy the certificate to the /usr/local/share/ca-certificates/ route whit the following command:
 
-    ```console
+    ```sh
     cp rootCA.pem /usr/local/share/ca-certificates/
     ```
