@@ -1,4 +1,7 @@
-# Add tls encryption to js frontend/backend
+# Add Self Signed Certificate
+
+  - [Web](#Web)
+  - [MQTT](#MQTT)
 
 ## Environment
 
@@ -75,7 +78,7 @@ to sign your own certificates you need to become a certification authority, for 
     openssl verify -CAfile rootCA.pem -verify_hostname daim.ceit.com tls.crt
     ```
 
-## Implementation
+## Web
 
 ### React + babel (Frontend)
 
@@ -116,3 +119,105 @@ To use the self signed certificates we will need to tell our computer to trust o
     ```sh
     cp rootCA.pem /usr/local/share/ca-certificates/
     ```
+
+## MQTT
+
+### Basic Broker Configuration
+
+The broker configuration is done in the file mosquitto.conf
+
+```
+port 1883
+require_certificate false
+allow_anonymous false
+
+listener 8883
+cafile /mosquitto/config/certs/rootCA.pem
+certfile /mosquitto/config/certs/Mymqtt.crt
+keyfile /mosquitto/config/certs/Mymqtt.key
+tls_version tlsv1.2
+require_certificate true
+allow_anonymous false
+password_file /mosquitto/config/passwordfile
+```
+
+The password file (passwordfile) contains the user:password combination allowed to use the broker
+```
+CEIT1:$7$101$fHvGO+AtT5AbCJ5y$pRN+N6MhflgtVVTkjsDawWXR4LrCNMcbvNRo3Q3NMcziVmiZKoC8Z94uD1+mffe9VFNg3xGa5sjJUzRYu0YfYQ==
+```
+The password file is created with the command turn to enter a password for the user
+```
+mosquitto_passwd -c passwordfile user
+```
+To add additional users to the file
+```
+mosquitto_passwd -b passwordfile user password
+```
+
+### Mosquitto Terminal
+
+Subscriber:
+```
+mosquitto_sub -h ip -p port --cafile rootCA.pem  --cert Mymqtt.crt  --key Mymqtt.key  -t "topic" --tls-version tlsv1.2 -u "username" -P "password"
+```
+Publisher:
+```
+mosquitto_pub -h ip -p port --cafile rootCA.pem --cert MyCert.crt --key MyKey.key -t "topic" --tls-version tlsv1.2 -m "message" -u "username" -P "password"
+```
+
+### Paho Mqtt Python Client
+
+```
+import paho.mqtt.client as mqtt
+import ssl
+
+mqtt_client.username_pw_set(mqtt_username, password=mqtt_password)
+mqtt_client.tls_set(ca_certs=CA_PATH, certfile=CERT_PATH, keyfile=KEY_PATH, cert_reqs=ssl.CERT_REQUIRED,tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+mqtt_client.tls_insecure_set(True)
+mqtt_client.connect(ip, port=port)
+mqtt_client.loop_start()
+
+mqtt_client.subscribe(TOPIC_SUB, qos=0)
+```
+
+## Paho Mqtt C/C++ Client
+```
+MQTTClient client;
+MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
+MQTTClient_message pubmsg = MQTTClient_message_initializer;
+MQTTClient_deliveryToken delivery_token;
+
+int rc;
+
+string connect_address = "ssl://ip:port";
+
+MQTTClient_create(&client, connect_address.c_str(), CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+
+conn_opts.ssl = &ssl_opts;
+conn_opts.ssl->struct_version = 1;
+conn_opts.ssl->sslVersion = 3;
+
+conn_opts.ssl->trustStore = "rootCA.pem";
+conn_opts.ssl->keyStore = "MyCert.crt.pem";
+conn_opts.ssl->privateKey = "MyKey.key.pem";
+
+conn_opts.username = USERNAME;
+conn_opts.password = PASSWORD;
+
+conn_opts.keepAliveInterval = 20;
+conn_opts.cleansession = 1;
+
+MQTTClient_setCallbacks(client, NULL, connlost, msgarrvd, delivered);
+printf("Connecting to ip:port=%s\n", connect_address.c_str());
+
+while ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
+{
+    printf("Failed to connect, return code %d\n", rc);
+    printf("New attempt: Connecting to ip:port=%s\n", connect_address.c_str());
+}
+
+pubmsg.qos = QOS;
+pubmsg.retained = 0;
+delivery_token = 0;
+```
