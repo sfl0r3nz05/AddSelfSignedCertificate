@@ -1,9 +1,9 @@
 # Add Self Signed Certificate
 
-  - [Web](#Web)
-  - [MQTT](#MQTT)
+  - [Web Environment](#Web)
+  - [MQTT Environment](#MQTT)
 
-## Generate certificates
+## Generate self signed certificates
 
 As many certificates must be generated as there are entities, for example, one for a client and one for a server.
 
@@ -13,39 +13,39 @@ to sign your own certificates you need to become a certification authority, for 
 
 - Generate a key
 
-  ``sh
+  ```sh
     openssl genrsa -des3 -out rootCA.key 2048
-  ``
+  ```
 
 - Generate a root certificate
 
-  ``sh
+  ```sh
     openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 730 -out rootCA.pem
-  ``
+  ```
 
 - check the root certificate
 
-  ``sh
+  ```sh
     openssl x509 -in rootCA.pem -text -noout
-  ``
+  ```
 
 ### Create a certificate request
 
 - Create a private key to be used during the certificate signing process
 
-  ``sh
+  ```sh
     openssl genrsa -out tls.key 2048
-  ``
+  ```
 
 - Use the private key to create a certificate signing request
 
-  ``` sh
-   openssl req -new -key tls.key -out tls.csr
-    ```
+  ```sh
+    openssl req -new -key tls.key -out tls.csr
+  ```
 
 - Create a config file openssl.cnf with a list of domain names associated with the certificate (replace daim.ceit.com with your own domain)
 
-  ``sh
+  ```sh
     # Extensions to add to a certificate request
     basicConstraints       = CA:FALSE
     authorityKeyIdentifier = keyid:always, issuer:always
@@ -53,13 +53,13 @@ to sign your own certificates you need to become a certification authority, for 
     subjectAltName         = @alt_names
     [ alt_names ]
     DNS.1 = daim.ceit.com
-  ``
+  ```
 
 ### Sign the certificate request using CA
 
 - To sign the CSR using openssl.cnf and the rootCA created:
 
-  ``sh
+  ```sh
     openssl x509 -req \
         -in tls.csr \
         -CA rootCA.pem \
@@ -69,17 +69,15 @@ to sign your own certificates you need to become a certification authority, for 
         -days 730 \
         -sha256 \
         -extfile openssl.cnf
-  ``
+  ```
 
 - verify that the certificate is built correctly:
 
-  ``sh
+  ```sh
     openssl verify -CAfile rootCA.pem -verify_hostname daim.ceit.com tls.crt
-  ``
+  ```
 
-## Web
-
-### Environment
+## Web Environment
 
 In this particular case the frontend is using react js with babel, and the backend is using express js.
 
@@ -87,9 +85,9 @@ In this particular case the frontend is using react js with babel, and the backe
 
  we will need to add the --https --key and --cert parameters at the launch command in the package.json file
 
-  ``console
+  ```console
     "start": "babel-node ./node_modules/webpack-dev-server/bin/webpack-dev-server --https --key "route to your key" --cert "route to your cert" --host 0.0.0.0 --open",
-  ``
+  ```
 
 ### Express js (Backend)
 
@@ -130,7 +128,7 @@ To use the self signed certificates we will need to tell our computer to trust o
 
 The broker configuration is done in the file mosquitto.conf
 
-```
+```console
 port 1883
 require_certificate false
 allow_anonymous false
@@ -146,32 +144,40 @@ password_file /mosquitto/config/passwordfile
 ```
 
 The password file (passwordfile) contains the user:password combination allowed to use the broker
-```
+
+``` console
 CEIT1:$7$101$fHvGO+AtT5AbCJ5y$pRN+N6MhflgtVVTkjsDawWXR4LrCNMcbvNRo3Q3NMcziVmiZKoC8Z94uD1+mffe9VFNg3xGa5sjJUzRYu0YfYQ==
 ```
+
 The password file is created with the command turn to enter a password for the user
-```
+
+```console
 mosquitto_passwd -c passwordfile user
 ```
+
 To add additional users to the file
-```
+
+```console
 mosquitto_passwd -b passwordfile user password
 ```
 
 ### Mosquitto Terminal
 
 Subscriber:
-```
+
+```console
 mosquitto_sub -h ip -p port --cafile rootCA.pem  --cert Mymqtt.crt  --key Mymqtt.key  -t "topic" --tls-version tlsv1.2 -u "username" -P "password"
 ```
+
 Publisher:
-```
+
+```console
 mosquitto_pub -h ip -p port --cafile rootCA.pem --cert MyCert.crt --key MyKey.key -t "topic" --tls-version tlsv1.2 -m "message" -u "username" -P "password"
 ```
 
 ### Paho Mqtt Python Client
 
-```
+```console
 import paho.mqtt.client as mqtt
 import ssl
 
@@ -185,7 +191,8 @@ mqtt_client.subscribe(TOPIC_SUB, qos=0)
 ```
 
 ## Paho Mqtt C/C++ Client
-```
+
+```console
 MQTTClient client;
 MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
 MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
