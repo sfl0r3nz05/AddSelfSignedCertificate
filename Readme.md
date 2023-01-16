@@ -3,41 +3,39 @@
   - [Web](#Web)
   - [MQTT](#MQTT)
 
-## Environment
-
-In this particular case the frontend is using react js with babel, and the backend is using express js.
-
 ## Generate certificates
 
-### Becoming a ca
+As many certificates must be generated as there are entities, for example, one for a client and one for a server.
+
+### Becoming a CA
 
 to sign your own certificates you need to become a certification authority, for that you need a private key (.key) and a Root Certificate Authority certificate (.pem).
 
 - Generate a key
 
-  ``` sh
+  ``sh
     openssl genrsa -des3 -out rootCA.key 2048
-    ```
+  ``
 
 - Generate a root certificate
 
-  ``` sh
-   openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 730 -out rootCA.pem
-    ```
+  ``sh
+    openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 730 -out rootCA.pem
+  ``
 
 - check the root certificate
 
-  ``` sh
-   openssl x509 -in rootCA.pem -text -noout
-    ```
+  ``sh
+    openssl x509 -in rootCA.pem -text -noout
+  ``
 
 ### Create a certificate request
 
 - Create a private key to be used during the certificate signing process
 
-  ``` sh
+  ``sh
     openssl genrsa -out tls.key 2048
-    ```
+  ``
 
 - Use the private key to create a certificate signing request
 
@@ -46,21 +44,22 @@ to sign your own certificates you need to become a certification authority, for 
     ```
 
 - Create a config file openssl.cnf with a list of domain names associated with the certificate (replace daim.ceit.com with your own domain)
-  ``` sh
-  # Extensions to add to a certificate request
-  basicConstraints       = CA:FALSE
-  authorityKeyIdentifier = keyid:always, issuer:always
-  keyUsage               = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
-  subjectAltName         = @alt_names
-  [ alt_names ]
-  DNS.1 = daim.ceit.com
-    ```
+
+  ``sh
+    # Extensions to add to a certificate request
+    basicConstraints       = CA:FALSE
+    authorityKeyIdentifier = keyid:always, issuer:always
+    keyUsage               = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
+    subjectAltName         = @alt_names
+    [ alt_names ]
+    DNS.1 = daim.ceit.com
+  ``
 
 ### Sign the certificate request using CA
 
 - To sign the CSR using openssl.cnf and the rootCA created:
 
-  ``` sh
+  ``sh
     openssl x509 -req \
         -in tls.csr \
         -CA rootCA.pem \
@@ -70,23 +69,28 @@ to sign your own certificates you need to become a certification authority, for 
         -days 730 \
         -sha256 \
         -extfile openssl.cnf
-    ```
+  ``
 
 - verify that the certificate is built correctly:
 
-  ``` sh
+  ``sh
     openssl verify -CAfile rootCA.pem -verify_hostname daim.ceit.com tls.crt
-    ```
+  ``
 
 ## Web
+
+### Environment
+
+In this particular case the frontend is using react js with babel, and the backend is using express js.
 
 ### React + babel (Frontend)
 
  we will need to add the --https --key and --cert parameters at the launch command in the package.json file
 
-  ```console
+  ``console
     "start": "babel-node ./node_modules/webpack-dev-server/bin/webpack-dev-server --https --key "route to your key" --cert "route to your cert" --host 0.0.0.0 --open",
-  ```
+  ``
+
 ### Express js (Backend)
 
   The file to change is the one that contains the server startup, In this particular project the file that contains the configuration is backend/bin/www, but it can be other
