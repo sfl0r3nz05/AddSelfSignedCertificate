@@ -168,33 +168,49 @@ To add additional users to the file
 mosquitto_passwd -b passwordfile user password
 ```
 
-### Mosquitto Terminal
+### Mosquitto client on bash
+
+> **Note:** Clients are previously installed. E.g.: `sudo apt install mosquitto-clients`
 
 Subscriber:
 
 ```console
-mosquitto_sub -h ip -p port --cafile rootCA.pem  --cert Mymqtt.crt  --key Mymqtt.key  -t "topic" --tls-version tlsv1.2 -u "username" -P "password"
+mosquitto_sub -h ip -p port --cafile rootCA.pem  --cert Mymqtt.crt  --key Mymqtt.key  -t "topic" --tls-version tlsv1.2
 ```
 
 Publisher:
 
 ```console
+mosquitto_pub -h ip -p port --cafile rootCA.pem --cert MyCert.crt --key MyKey.key -t "topic" --tls-version tlsv1.2 -m "message"
+```
+
+> **Note:** Include this option in case to use username and password authentication.
+
+```console
+mosquitto_sub -h ip -p port --cafile rootCA.pem  --cert Mymqtt.crt  --key Mymqtt.key  -t "topic" --tls-version tlsv1.2 -u "username" -P "password"
 mosquitto_pub -h ip -p port --cafile rootCA.pem --cert MyCert.crt --key MyKey.key -t "topic" --tls-version tlsv1.2 -m "message" -u "username" -P "password"
 ```
 
 ### Paho Mqtt Python Client
 
+> **Note:** Paho library has previously been installed. E.g.: `pip install paho-mqtt`.
+
 ```console
 import paho.mqtt.client as mqtt
 import ssl
 
-mqtt_client.username_pw_set(mqtt_username, password=mqtt_password)
 mqtt_client.tls_set(ca_certs=CA_PATH, certfile=CERT_PATH, keyfile=KEY_PATH, cert_reqs=ssl.CERT_REQUIRED,tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
 mqtt_client.tls_insecure_set(True)
 mqtt_client.connect(ip, port=port)
 mqtt_client.loop_start()
 
 mqtt_client.subscribe(TOPIC_SUB, qos=0)
+```
+
+> **Note:** Include this line in case to use username and password authentication.
+
+```console
+mqtt_client.username_pw_set(mqtt_username, password=mqtt_password)
 ```
 
 ## Paho Mqtt C/C++ Client
@@ -239,3 +255,12 @@ pubmsg.qos = QOS;
 pubmsg.retained = 0;
 delivery_token = 0;
 ```
+
+### Mosquitto client on docker
+
+> **Note:** Docker has previously been installed.
+
+```console
+docker run -it --rm --name mqtt-publisher --network fiware_default -v $(pwd):/opt/certs efrecon/mqtt-client pub -h mosquitto -p 8883 --cafile /opt/certs/rootCA/rootCA.pem --cert /opt/certs/client/mqtt-client.crt --key /opt/certs/client/mqtt-client.key -t "/5jggokgpepnvsb2uv4s40d59ov/agv001/attrs" -m '{"AGV_Th":7,"AGV_X":35}'
+```
+
