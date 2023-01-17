@@ -130,7 +130,7 @@ To use the self signed certificates we will need to tell our computer to trust o
 
 ### Basic Broker Configuration
 
-The broker configuration is done in the file mosquitto.conf
+The broker configuration is done in the file `mosquitto.conf`.
 
 ```console
 listener 8883 0.0.0.0
@@ -144,7 +144,7 @@ connection_messages true
 allow_anonymous true
 ```
 
-> **Note:** [Optional] To add user and password based authentication add to the mosquitto.conf file:
+> **Note:** [Optional] To add user and password based authentication add to the `mosquitto.conf` file:
 
 ```console
 password_file /mosquitto/config/passwordfile
