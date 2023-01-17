@@ -1,7 +1,7 @@
 # Add Self Signed Certificate
 
-  - [Web Environment](#Web)
-  - [MQTT Environment](#MQTT)
+  - [Web Security](#Web)
+  - [MQTT Security](#MQTT)
 
 ## Generate self signed certificates
 
@@ -81,7 +81,7 @@ To sign your own certificates you need to become a certification authority, for 
     openssl verify -CAfile rootCA.pem -verify_hostname daim.ceit.com tls.crt
   ```
 
-## Web Environment
+## Web Security
 
 In this particular case the frontend is using react js with babel, and the backend is using express js.
 
@@ -126,24 +126,27 @@ To use the self signed certificates we will need to tell our computer to trust o
     cp rootCA.pem /usr/local/share/ca-certificates/
     ```
 
-## MQTT Environment
+## MQTT Security
 
 ### Basic Broker Configuration
 
 The broker configuration is done in the file mosquitto.conf
 
 ```console
-port 1883
-require_certificate false
-allow_anonymous false
-
-listener 8883
-cafile /mosquitto/config/certs/rootCA.pem
-certfile /mosquitto/config/certs/Mymqtt.crt
-keyfile /mosquitto/config/certs/Mymqtt.key
+listener 8883 0.0.0.0
+cafile /mosquitto/config/rootCA.pem
+certfile /mosquitto/config/broker.crt
+keyfile /mosquitto/config/broker.key
 tls_version tlsv1.2
 require_certificate true
-allow_anonymous false
+persistence false
+connection_messages true
+allow_anonymous true
+```
+
+> **Note:** [Optional] To add user and password based authentication add to the mosquitto.conf file:
+
+```console
 password_file /mosquitto/config/passwordfile
 ```
 
