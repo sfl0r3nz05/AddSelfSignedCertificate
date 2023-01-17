@@ -31,6 +31,8 @@ To sign your own certificates you need to become a certification authority, for 
 
 ### Create a certificate request
 
+> **Note:** These are the certificates of the entities, i.e. `clients`, `servers` or `brokers`.
+
 - Create a private key to be used during the certificate signing process
 
   ```sh
@@ -57,6 +59,8 @@ To sign your own certificates you need to become a certification authority, for 
 
 ### Sign the certificate request using CA
 
+> **Note:** The following procedure allows signing the certificates of the entities, i.e. `clients`, `servers` or `brokers`.
+
 - To sign the CSR using openssl.cnf and the rootCA created:
 
   ```sh
@@ -71,7 +75,7 @@ To sign your own certificates you need to become a certification authority, for 
         -extfile openssl.cnf
   ```
 
-- verify that the certificate is built correctly:
+- Verify that the certificate is built correctly:
 
   ```sh
     openssl verify -CAfile rootCA.pem -verify_hostname daim.ceit.com tls.crt
