@@ -43,7 +43,7 @@ To sign your own certificates you need to become a certification authority, for 
     openssl req -new -key tls.key -out tls.csr
   ```
 
-- Create a config file openssl.cnf with a list of domain names associated with the certificate (replace daim.ceit.com with your own domain)
+- Create a config file openssl.cnf with a list of domain names associated with the certificate (*replace daim.ceit.com with your own domain*)
 
   ```sh
     # Extensions to add to a certificate request
