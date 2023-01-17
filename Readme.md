@@ -5,11 +5,11 @@
 
 ## Generate self signed certificates
 
-As many certificates must be generated as there are entities, for example, one for a client and one for a server.
+As many certificates as entities must be generated, e.g. one for each `client` and one for each `server` or `broker`.
 
 ### Becoming a CA
 
-to sign your own certificates you need to become a certification authority, for that you need a private key (.key) and a Root Certificate Authority certificate (.pem).
+To sign your own certificates you need to become a certification authority, for that you need a private key (.key) and a Root Certificate Authority certificate (.pem).
 
 - Generate a key
 
